@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatientInsight - Premium Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #38bdf8;
+            --accent-secondary: #818cf8;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --danger: #f43f5e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        /* Animated Background Mesh */
+        .mesh-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; overflow: hidden;
+            background: #0f172a;
+        }
+        .mesh-blob {
+            position: absolute; filter: blur(90px); opacity: 0.5; border-radius: 50%;
+            animation: pulse 10s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #312e81; }
+        .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: #0c4a6e; animation-delay: 2s; }
+        .blob-3 { top: 40%; left: 40%; width: 400px; height: 400px; background: #4c1d95; animation-delay: 4s; opacity: 0.3; }
+
+        @keyframes pulse { 0% { transform: scale(1) translate(0, 0); } 100% { transform: scale(1.2) translate(50px, 50px); } }
+
+        /* App Layout */
+        .sidebar {
+            width: 280px; padding: 30px 20px;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            display: flex; flex-direction: column; gap: 40px;
+        }
+        .logo { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+        
+        .nav-item {
+            padding: 14px 20px; border-radius: 12px; cursor: pointer;
+            color: var(--text-secondary); font-weight: 500; font-size: 16px;
+            transition: all 0.3s ease; display: flex; align-items: center; gap: 12px;
+        }
+        .nav-item.active { background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); }
+        .nav-item:hover:not(.active) { color: var(--text-primary); background: rgba(255,255,255,0.03); }
+
+        .main-content {
+            flex: 1; padding: 40px 60px;
+            display: flex; flex-direction: column; gap: 30px;
+            position: relative;
+        }
+
+        /* Topbar & Search */
+        .topbar { display: flex; justify-content: space-between; align-items: center; }
+        .header-text h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .header-text p { color: var(--text-secondary); font-size: 16px; }
+
+        .search-container {
+            position: relative; width: 400px;
+        }
+        .search-container input {
+            width: 100%; padding: 16px 24px; border-radius: 99px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            color: white; font-size: 16px; outline: none;
+            backdrop-filter: blur(10px); transition: all 0.3s;
+        }
+        .search-container input:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15); }
+        .search-btn {
+            position: absolute; right: 8px; top: 8px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none; padding: 10px 24px; border-radius: 99px;
+            color: white; font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        .search-btn:hover { box-shadow: 0 0 15px rgba(56, 189, 248, 0.5); transform: translateY(-1px); }
+
+        /* UI States */
+        .state-view { display: none; margin-top: 20px; animation: fadeIn 0.5s ease; }
+        .state-view.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* State 1: Empty */
+        .empty-state { text-align: center; padding: 100px 0; }
+        .empty-icon { font-size: 64px; opacity: 0.3; margin-bottom: 20px; display: block; }
+        .empty-state h3 { font-size: 24px; margin-bottom: 10px; color: var(--text-secondary); }
+
+        /* State 2: Loading */
+        .loading-state { text-align: center; padding: 100px 0; }
+        .spinner { width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 30px; box-shadow: 0 0 30px rgba(56,189,248,0.2); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* State 3: Dashboard */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .glass-card {
+            background: var(--glass-bg); padding: 30px; border-radius: 20px;
+            border: 1px solid var(--glass-border); backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); }
+        
+        .profile-hdr { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #1e293b, #334155); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; border: 2px solid var(--accent-primary); }
+        .profile-info h2 { font-size: 28px; margin-bottom: 5px; }
+        .badge { background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.3); }
+        
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .detail-item label { color: var(--text-secondary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+        .detail-item p { font-size: 18px; font-weight: 500; }
+
+        .chart-placeholder { height: 180px; background: linear-gradient(transparent 50%, rgba(56, 189, 248, 0.1) 100%); border-bottom: 2px solid var(--accent-primary); margin-top: 20px; border-radius: 10px; position: relative; }
+        .chart-placeholder::after { content: 'Lab Value Trends'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 2px; }
+
+        /* State 4: Error */
+        .error-banner {
+            background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3);
+            border-radius: 16px; padding: 30px; display: flex; align-items: flex-start; gap: 20px;
+        }
+        .error-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(244, 63, 94, 0.2); display: flex; align-items: center; justify-content: center; color: var(--danger); font-size: 24px; flex-shrink: 0; }
+        .error-content h3 { color: var(--danger); font-size: 20px; margin-bottom: 8px; }
+        .error-content p { color: var(--text-secondary); line-height: 1.6; }
+
+        /* Control Panel for Screenshots */
+        .screenshot-controls {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9); padding: 15px 25px; border-radius: 99px;
+            border: 1px solid var(--glass-border); backdrop-filter: blur(10px);
+            display: flex; gap: 15px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .ctrl-btn {
+            background: transparent; border: 1px solid var(--glass-border);
+            color: white; padding: 8px 16px; border-radius: 99px; cursor: pointer;
+            font-size: 14px; font-weight: 500; transition: all 0.2s;
+        }
+        .ctrl-btn:hover, .ctrl-btn.active { background: white; color: black; }
+    </style>
+</head>
+<body>
+
+    <div class="mesh-bg">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+        <div class="mesh-blob blob-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            PatientInsight
+        </div>
+        <nav style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="nav-item active">⌕ Intelligence Search</div>
+            <div class="nav-item">👥 Registry Database</div>
+            <div class="nav-item">📈 Real-time Analytics</div>
+            <div class="nav-item">⚙️ System Configuration</div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="header-text">
+                <h1>Global Search Engine</h1>
+                <p>Query external APIs and internal database nodes simultaneously.</p>
+            </div>
+            
+            <div class="search-container">
+                <input type="text" placeholder="Enter SSN securely (XXX-XX-XXXX)">
+                <button class="search-btn">Decrypt</button>
+            </div>
+        </header>
+
+        <!-- View States -->
+        <div id="view-empty" class="state-view active">
+            <div class="empty-state">
+                <span class="empty-icon">🛡️</span>
+                <h3>System Ready</h3>
+                <p style="color: var(--text-secondary)">Awaiting input to begin secure data handshake.</p>
+            </div>
+        </div>
+
+        <div id="view-loading" class="state-view">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <h3 style="margin-bottom: 10px; font-size: 24px;">Querying Health Networks...</h3>
+                <p style="color: var(--accent-primary); font-weight: 600;">Authenticating via external REST APIs</p>
+            </div>
+        </div>
+
+        <div id="view-dashboard" class="state-view">
+            <div class="dashboard-grid">
+                <!-- Patient Info Card -->
+                <div class="glass-card">
+                    <div class="profile-hdr">
+                        <div class="avatar">JD</div>
+                        <div class="profile-info">
+                            <h2>Johnathan Doe</h2>
+                            <span class="badge">Identity Verified</span>
+                        </div>
+                    </div>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <label>Social Security Number</label>
+                            <p>***-**-6789</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Date of Birth</label>
+                            <p>1985-04-12 <span style="font-size: 13px; color: var(--text-secondary)">(39 yrs)</span></p>
+                        </div>
+                        <div class="detail-item" style="grid-column: span 2;">
+                            <label>Primary Residence</label>
+                            <p>1024 Cyber Ave, Suite 256<br>San Francisco, CA 94107</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sync Status / Analytics -->
+                <div class="glass-card">
+                    <h3 style="font-size: 22px; margin-bottom: 25px; display: flex; justify-content: space-between;">
+                        Network Sync Status
+                        <span style="color: var(--accent-primary); font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 8px; height: 8px; background: var(--accent-primary); border-radius: 50%; box-shadow: 0 0 10px var(--accent-primary);"></span> Live
+                        </span>
+                    </h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div style="display: flex; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: var(--text-secondary)">🏥 Medication API</span>
+                            <span style="color: var(--success); font-weight: 600;">Synched (14 records)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
+                            <span style="color: var(--text-secondary)">💉 Vaccination Hub</span>
+                            <span style="color: var(--success); font-weight: 600;">Synched (5 records)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-secondary)">🔬 Lab Results DB</span>
+                            <span style="color: var(--success); font-weight: 600;">Synched (22 tests)</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-placeholder"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-error" class="state-view">
+            <div class="error-banner">
+                <div class="error-icon">✕</div>
+                <div class="error-content">
+                    <h3>Integrity Verification Failed</h3>
+                    <p>The system was unable to establish a handshake with the external records registry. Error details indicate: <strong>404 Not Found (ProblemDetails payload received).</strong> Please ensure the SSN is correctly formatted and the patient holds active status within the Atlas/Insight networks.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Screenshot Controls -->
+    <div class="screenshot-controls">
+        <button class="ctrl-btn active" onclick="switchState('empty', this)">1. Empty</button>
+        <button class="ctrl-btn" onclick="switchState('loading', this)">2. Loading</button>
+        <button class="ctrl-btn" onclick="switchState('dashboard', this)">3. Dashboard</button>
+        <button class="ctrl-btn" onclick="switchState('error', this)">4. Error</button>
+    </div>
+
+    <script>
+        function switchState(stateName, btnElement) {
+            // Hide all views
+            document.querySelectorAll('.state-view').forEach(el => el.classList.remove('active'));
+            // Remove active from buttons
+            document.querySelectorAll('.ctrl-btn').forEach(el => el.classList.remove('active'));
+            
+            // Show requested view
+            document.getElementById(`view-${stateName}`).classList.add('active');
+            // Highlight button
+            btnElement.classList.add('active');
+        }
+    </script>
+</body>
+</html>
