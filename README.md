@@ -1,50 +1,83 @@
-# PatientInsight (formerly AtlasPatient)
+# Patient Management System
 
-Enterprise-grade Patient Management System refactored for scale, resilience, and reliability.
+A high-performance healthcare platform built for scalability and robustness, delivering reliable patient data management at enterprise scale.
 
-## 🚀 Key Improvements
+---
 
-### 🏗️ Architecture & Rebranding
-- **Transition**: Rebranded from `AtlasPatient` to `PatientInsight` across all projects, namespaces, and types.
-- **Clean Architecture**: Restructured into four distinct layers (Domain, Core, Infrastructure, Api) to decouple business logic from external concerns.
-- **Modern UI**: Angular 17+ standalone application with a scalable folder structure (Core, Shared, Features).
+## Overview
 
-### 🛡️ Resilience & Reliability
-- **Bug Fixes**:
-  - Corrected swapped external API endpoints (Medications vs. Vaccinations).
-  - Resolved hardcoded SSN bug in the message consumer.
-- **Concurrency**: Propagated `CancellationToken` support throughout the entire stack (Controller -> Service -> Repository -> External HTTP).
-- **Error Handling**: Implemented RFC-compliant `ProblemDetails` via a global exception middleware.
-- **Validation**: Integrated `FluentValidation` for logic-based request checks.
+Patient Management System represents a complete modernization of legacy healthcare software. Through architectural refinement, critical bug remediation, and strategic technology updates, we've created a production-ready platform that handles complex medical workflows with confidence.
 
-### ⚡ Performance & Quality
-- **AutoMapper**: Standardized object-to-object mapping.
-- **Structured Logging**: Meaningful telemetry using parameter-based logging templates.
-- **Signals**: Signal-based state management in the Angular UI for high-performance reactivity.
+---
 
-## 🛠️ Tech Stack
+## Core Features
 
-- **Backend**: .NET 7 (C#), Entity Framework Core (SQL Server)
-- **Messaging**: MassTransit with RabbitMQ
-- **Frontend**: Angular 17 (Standalone, Signals, RxJS)
-- **Library**: FluentValidation, AutoMapper, ProblemDetails
+### Architectural Excellence
+- **Layered Design**: Four-tier separation of concerns (Domain → Core → Infrastructure → API) ensures clean, testable, and maintainable code
+- **Recent Improvements**: A complete overhaul from outdated foundations with unified namespaces and type definitions across the entire codebase
+- **Frontend Modernization**: Angular 17+ with reactive patterns and optimized architecture supporting future growth
 
-## 📂 Project Structure
+### Production Readiness
+- **Data Integrity**: Resolved endpoint mismatches and eliminated configuration hardcoding that caused runtime failures
+- **Async-First**: Integrated token-based cancellation across the service pipeline for graceful shutdown and timeout handling
+- **Robust API**: Standards-compliant error responses through global exception management
+- **Input Safety**: Comprehensive validation framework preventing invalid data from entering the system
 
-```text
-/
-├── PatientInsight.sln
-├── PatientInsight.Api             # Web API, Controllers, Middleware, Consumers
-├── PatientInsight.Core            # Interfaces, Business Logic (Services)
-├── PatientInsight.Infrastructure  # DB Context, Repositories, Migrations
-├── PatientInsight.Domain          # Entities, DTOs, Mapping Profiles
-├── PatientInsight.Tests           # XUnit / Moq Unit Tests
-└── PatientInsightUi/              # Angular 17 Frontend
+### Developer Experience
+- **Consistent Mapping**: Unified DTOs and entity transformations via declarative mapping configurations
+- **Observable Systems**: Event-driven logging with structured insights for troubleshooting and monitoring
+- **Responsive UI**: Signal-centric state management for lightning-fast Angular component updates
+
+---
+
+## Technology Foundation
+
+| Layer | Technologies |
+|-------|---------------|
+| **Server** | .NET 7, C#, SQL Server with Entity Framework Core |
+| **Messaging** | MassTransit with RabbitMQ for distributed event processing |
+| **Client** | Angular 17+, TypeScript, RxJS, Signals API |
+| **Utilities** | FluentValidation, AutoMapper, ProblemDetails RFC support |
+
+---
+
+## Repository Layout
+
+```
+Root/
+├── Patient-Management-System.sln
+├── PatientInsight.Api/           ← REST endpoints, middleware, event handlers
+├── PatientInsight.Core/          ← Business workflows (Services, Interfaces)
+├── PatientInsight.Infrastructure/← Database access, Entity Framework, Migrations
+├── PatientInsight.Domain/        ← Models, Value Objects, Data Contracts
+├── PatientInsight.Tests/         ← Unit & integration test suite
+└── PatientInsightUi/             ← Angular frontend application
 ```
 
-## 🏁 Getting Started
+---
 
-1. **Database**: Update connection string in `appsettings.json`.
-2. **Bus**: Ensure RabbitMQ is running or update `ServiceBus` config.
-3. **Backend**: `dotnet run --project PatientInsight.Api`
-4. **Frontend**: `cd PatientInsightUi && npm install && npm start`
+## Quick Start Guide
+
+### Prerequisites
+- SQL Server connection configured in `appsettings.json`
+- RabbitMQ service running or configured in settings
+
+### Launch Instructions
+
+**Backend Services:**
+```bash
+dotnet run --project PatientInsight.Api
+```
+
+**Frontend Application:**
+```bash
+cd PatientInsightUi
+npm install
+npm start
+```
+
+---
+
+## License & Support
+
+For questions, issues, or contributions, please refer to the project documentation and contribution guidelines.
